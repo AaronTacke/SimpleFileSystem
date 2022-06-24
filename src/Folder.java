@@ -54,6 +54,13 @@ public class Folder extends Element {
             children.add(new Folder(this, name));
     }
 
+    // Removes and returns the element if it exists
+    public Element remove(String name) {
+        Element child = getChild(name);
+        children.remove(child);
+        return child;
+    }
+
     // Handle commands until the folder is left (using cd ..)
     public void ui() {
         Scanner scanner = new Scanner(System.in);
@@ -78,7 +85,7 @@ public class Folder extends Element {
                 nano DATEI - ermöglicht Hinzufügen einer Zeile an DATEI
                 help - gibt diese Benutzungs-Hilfe erneut aus
                 clear DATEI - entfernt den Inhalt aus DATEI
-                TODO rm ELEMENT - entfernt Datei oder Ordner namens ELEMENT
+                rm ELEMENT - entfernt Datei oder Ordner namens ELEMENT
                 TODO tree - gibt einen Verzeichnis-Baum ab dem aktuellen Ordner aus
                 TODO mv ELEMENT PATH - verschiebt Element ELEMENT nach PATH
                 TODO cp ELEMENT PATH - kopiert Element ELEMENT nach PATH""");
@@ -96,6 +103,7 @@ public class Folder extends Element {
             case "nano" -> handleNano(input);
             case "help" -> printHelp();
             case "clear" -> handleClear(input);
+            case "rm" -> handleRm(input);
             default -> System.out.println("Befehl \"" + input[0] + "\" nicht gefunden.");
         }
     }
@@ -166,5 +174,13 @@ public class Folder extends Element {
             System.out.println(input[1] + " ist keine Datei.");
         else
             ((File) getChild(input[1])).write("");
+    }
+
+    private void handleRm(String[] input) {
+        if (input.length != 2) {
+            System.out.println("\"rm ELEMENT\" erwartet 1 Argument.");
+        }else if(remove(input[1]) == null){
+            System.out.println(input[1] + " existiert nicht.");
+        }
     }
 }
