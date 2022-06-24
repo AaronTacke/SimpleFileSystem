@@ -64,6 +64,26 @@ public class Folder extends Element {
         }
     }
 
+    // Print the usage information for the UI
+    public void printHelp() {
+        System.out.println("""
+                Benutzung:
+                cd ORDNER - Öffnet Ordner ORDNER
+                cd .. - Schließt aktuellen Ordner
+                ls - listet alle Elemente im Ordner auf
+                pwd - gibt den Pfad des aktuellen Ordners aus
+                mkdir ORDNER - erstellt Ordner namens ORDNER
+                touch DATEI - erstellt Datei namens DATEI
+                cat DATEI - gibt Inhalt der Datei DATEI aus
+                nano DATEI - ermöglicht Hinzufügen einer Zeile an DATEI
+                help - gibt diese Benutzungs-Hilfe erneut aus
+                TODO clear DATEI - entfernt den Inhalt aus DATEI
+                TODO rm ELEMENT - entfernt Datei oder Ordner namens ELEMENT
+                TODO tree - gibt einen Verzeichnis-Baum ab dem aktuellen Ordner aus
+                TODO mv ELEMENT PATH - verschiebt Element ELEMENT nach PATH
+                TODO cp ELEMENT PATH - kopiert Element ELEMENT nach PATH""");
+    }
+
     // Call the corresponding function for every possible command
     private void handleInput(String[] input) {
         switch (input[0]) {
@@ -74,6 +94,7 @@ public class Folder extends Element {
             case "touch" -> handleTouch(input);
             case "cat" -> handleCat(input);
             case "nano" -> handleNano(input);
+            case "help" -> printHelp();
             default -> System.out.println("Befehl \"" + input[0] + "\" nicht gefunden.");
         }
     }
