@@ -77,7 +77,7 @@ public class Folder extends Element {
                 cat DATEI - gibt Inhalt der Datei DATEI aus
                 nano DATEI - ermöglicht Hinzufügen einer Zeile an DATEI
                 help - gibt diese Benutzungs-Hilfe erneut aus
-                TODO clear DATEI - entfernt den Inhalt aus DATEI
+                clear DATEI - entfernt den Inhalt aus DATEI
                 TODO rm ELEMENT - entfernt Datei oder Ordner namens ELEMENT
                 TODO tree - gibt einen Verzeichnis-Baum ab dem aktuellen Ordner aus
                 TODO mv ELEMENT PATH - verschiebt Element ELEMENT nach PATH
@@ -95,6 +95,7 @@ public class Folder extends Element {
             case "cat" -> handleCat(input);
             case "nano" -> handleNano(input);
             case "help" -> printHelp();
+            case "clear" -> handleClear(input);
             default -> System.out.println("Befehl \"" + input[0] + "\" nicht gefunden.");
         }
     }
@@ -156,5 +157,14 @@ public class Folder extends Element {
             String newline = new Scanner(System.in).nextLine();
             f.write(f.read() + "\n" + newline);
         }
+    }
+
+    private void handleClear(String[] input) {
+        if (input.length != 2)
+            System.out.println("\"clear FILE\" erwartet 1 Argument.");
+        else if (!Element.isFile(getChild(input[1])))
+            System.out.println(input[1] + " ist keine Datei.");
+        else
+            ((File) getChild(input[1])).write("");
     }
 }
