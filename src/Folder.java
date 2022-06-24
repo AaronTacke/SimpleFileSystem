@@ -19,6 +19,15 @@ public class Folder extends Element {
         children = new HashSet<>();
     }
 
+    // Copy constructor
+    public Folder(Folder folder) {
+        super(folder);
+        children = new HashSet<>();
+        for (Element child : folder.children) {
+            children.add(Element.copy(child));
+        }
+    }
+
     // Returns a child with a given name
     // or null, if the name does not exist
     public Element getChild(String name) {
@@ -141,7 +150,7 @@ public class Folder extends Element {
                 rm ELEMENT - entfernt Datei oder Ordner namens ELEMENT
                 tree - gibt einen Verzeichnis-Baum ab dem aktuellen Ordner aus
                 mv ELEMENT PATH - verschiebt Element ELEMENT nach PATH
-                TODO cp ELEMENT PATH - kopiert Element ELEMENT nach PATH""");
+                cp ELEMENT PATH - kopiert Element ELEMENT nach PATH""");
     }
 
     // Call the corresponding function for every possible command
@@ -159,6 +168,7 @@ public class Folder extends Element {
             case "rm" -> handleRm(input);
             case "tree" -> handleTree(input);
             case "mv" -> handleMv(input);
+            case "cp" -> handleCp(input);
             default -> System.out.println("Befehl \"" + input[0] + "\" nicht gefunden.");
         }
     }
@@ -247,7 +257,7 @@ public class Folder extends Element {
         }
     }
 
-    private void handleMv(String[] input) {
+    private boolean handleMv(String[] input) {
         if (input.length != 3) {
             System.out.println("\"mv ELEMENT PATH\" erwartet 2 Argumente.");
         } else if (getChild(input[1]) == null) {
@@ -272,10 +282,30 @@ public class Folder extends Element {
                 e.parent = f;
                 if (e.rename(name)) {
                     f.children.add(e);
+                    return true;
                 } else {
                     // If renaming did not work, change bock whole procedure
                     e.parent = this;
                     children.add(e);
+                }
+            }
+        }
+        return false;
+    }
+
+    private void handleCp(String[] input) {
+        if (input.length != 3) {
+            System.out.println("\"mv ELEMENT PATH\" erwartet 2 Argumente.");
+        } else if (getChild(input[1]) == null) {
+            System.out.println(input[1] + " existiert nicht.");
+        } else {
+            Element copy = Element.copy(getChild(input[1]));
+            if (handleMv(input)) {
+                // If old element was moved to new position, we can add the copy to the original position
+                if (getChild(input[1]) == null) {
+                    children.add(copy);
+                } else {
+                    System.out.println("Der Pfad der Kopie muss sich vom Original unterscheiden.");
                 }
             }
         }

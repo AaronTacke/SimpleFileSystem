@@ -8,6 +8,12 @@ public class File extends Element {
         this.content = "";
     }
 
+    // Copy constructor
+    public File(File file) {
+        super(file);
+        content = file.content;
+    }
+
     @Override
     public String getTree() {
         return getName();

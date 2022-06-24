@@ -10,6 +10,12 @@ public abstract class Element {
         this.name = name;
     }
 
+    // Copy constructor
+    public Element(Element element) {
+        parent = element.parent;
+        name = element.name;
+    }
+
     // Return the name of the element
     public String getName() {
         return name;
@@ -60,6 +66,13 @@ public abstract class Element {
 
     // Searches for element recursively
     public abstract boolean search(Element e);
+
+    // Copies arbitrary element
+    public static Element copy(Element element) {
+        if (isFile(element)) return new File((File) element);
+        if (isFolder(element)) return new Folder((Folder) element);
+        return null;
+    }
 
     // Starts the UI with a short How-To Guide
     public static void main(String[] args) {
