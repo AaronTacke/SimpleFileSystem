@@ -1,9 +1,11 @@
 public abstract class Element {
-    protected Element parent;
-    private final String name;
+    protected Folder parent;
+    private String name;
 
     // Constructor setting the attributes
-    public Element(Element parent, String name) {
+    public Element(Folder parent, String name) {
+        if (!isCorrectName(name))
+            throw new IllegalArgumentException("Namen dürfen weder leer sein, noch Sonderzeichen enthalten.");
         this.parent = parent;
         this.name = name;
     }
@@ -13,8 +15,22 @@ public abstract class Element {
         return name;
     }
 
+    // Renames an element safely (checks rules for names and existing names in parent directory)
+    public boolean rename(String name) {
+        if (parent.getChild(name) != null) {
+            System.out.println("\"" + name + "\" existiert bereits in " + parent.getName() + ".");
+            return false;
+        } else if (!isCorrectName(name)) {
+            System.out.println("Namen dürfen weder leer sein, noch Sonderzeichen enthalten.");
+            return false;
+        } else {
+            this.name = name;
+            return true;
+        }
+    }
+
     // Return the parent element
-    public Element getParent() {
+    public Folder getParent() {
         return parent;
     }
 
@@ -22,6 +38,11 @@ public abstract class Element {
     public String getPath() {
         if (parent == this) return name;
         return parent.getPath() + "/" + name;
+    }
+
+    // Check, whether a String abides by the rules for a name of our File System
+    public static boolean isCorrectName(String str) {
+        return str != null && !str.contains(".") && !str.contains("/") && !str.contains(" ") && !str.contains("\n") && !str.equals("");
     }
 
     // Check, whether arbitrary objects are folders
@@ -36,6 +57,9 @@ public abstract class Element {
 
     // Prints a tree of the underlaying file structure recursively
     public abstract String getTree();
+
+    // Searches for element recursively
+    public abstract boolean search(Element e);
 
     // Starts the UI with a short How-To Guide
     public static void main(String[] args) {

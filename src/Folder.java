@@ -5,7 +5,7 @@ public class Folder extends Element {
     private final HashSet<Element> children;
 
     //Creates an empty folder
-    public Folder(Element parent, String name) {
+    public Folder(Folder parent, String name) {
         // super calls the constructor of Element
         super(parent, name);
         children = new HashSet<>();
@@ -38,6 +38,8 @@ public class Folder extends Element {
         // Check if name exists
         if (getChild(name) != null)
             System.out.println(name + " existiert bereits.");
+        else if (!isCorrectName(name))
+            System.out.println("Namen dürfen weder leer sein, noch Sonderzeichen enthalten.");
         else
             // Add new file to the set of children
             children.add(new File(this, name));
@@ -49,6 +51,8 @@ public class Folder extends Element {
         // Check if name exists
         if (getChild(name) != null)
             System.out.println(name + " existiert bereits.");
+        else if (!isCorrectName(name))
+            System.out.println("Namen dürfen weder leer sein, noch Sonderzeichen enthalten.");
         else
             // Add new folder to the set of children
             children.add(new Folder(this, name));
@@ -69,6 +73,45 @@ public class Folder extends Element {
             tree.append(child.getTree().replace("\n", "\n | "));
         }
         return tree.toString();
+    }
+
+    @Override
+    public boolean search(Element e) {
+        if (e == this) return true;
+        for (Element child : children) if (child.search(e)) return true;
+        return false;
+    }
+
+    // Returns the folder that is described by a path (if it exists)
+    // Path can be absolute (starting with / for root)
+    // Path can be relative (starting with something else)
+    public Folder getFolderFromPath(String path) {
+        Folder f = this;
+        // Absolute paths start with "/" so we jump to the root
+        if (path.startsWith("/")) {
+            while (f != f.parent) f = f.parent;
+            path = path.substring(1);
+        }
+        while (path.contains("/")) {
+            // For every part before an "/", we change the current folder
+            String[] paths = path.split("/", 2);
+            if (!paths[0].equals(".") && paths[0].startsWith(".")) {
+                // More than one dot means we visit the parents
+                f = f.parent;
+                paths[1] = paths[0].substring(1) + "/" + paths[1];
+            } else if (!paths[0].equals(".")) {
+                // Otherwise we look for a matching Folder
+                if (isFolder(f.getChild(paths[0]))) {
+                    f = (Folder) f.getChild(paths[0]);
+                } else {
+                    System.out.println("Es gibt keinen Ordner \"" + paths[0] + "\" in \"" + f.getName() + "\".");
+                    return null;
+                }
+            }
+            // Use the un-traversed part of the path as the new path
+            path = paths[1];
+        }
+        return f;
     }
 
     // Handle commands until the folder is left (using cd ..)
@@ -97,7 +140,7 @@ public class Folder extends Element {
                 clear DATEI - entfernt den Inhalt aus DATEI
                 rm ELEMENT - entfernt Datei oder Ordner namens ELEMENT
                 tree - gibt einen Verzeichnis-Baum ab dem aktuellen Ordner aus
-                TODO mv ELEMENT PATH - verschiebt Element ELEMENT nach PATH
+                mv ELEMENT PATH - verschiebt Element ELEMENT nach PATH
                 TODO cp ELEMENT PATH - kopiert Element ELEMENT nach PATH""");
     }
 
@@ -115,6 +158,7 @@ public class Folder extends Element {
             case "clear" -> handleClear(input);
             case "rm" -> handleRm(input);
             case "tree" -> handleTree(input);
+            case "mv" -> handleMv(input);
             default -> System.out.println("Befehl \"" + input[0] + "\" nicht gefunden.");
         }
     }
@@ -200,6 +244,40 @@ public class Folder extends Element {
             System.out.println("\"tree\" erwartet keine Argumente.");
         } else {
             System.out.println(getTree());
+        }
+    }
+
+    private void handleMv(String[] input) {
+        if (input.length != 3) {
+            System.out.println("\"mv ELEMENT PATH\" erwartet 2 Argumente.");
+        } else if (getChild(input[1]) == null) {
+            System.out.println(input[1] + " existiert nicht.");
+        } else if (getFolderFromPath(input[2]) != null) {
+            // getFolderFromPath produces error messages itself
+            // so we just have to handle the successful case
+            Folder f = getFolderFromPath(input[2]);
+            Element e = remove(input[1]);
+            // The part of the path behind the last "/" is the new filename
+            String name = input[2].substring(input[2].lastIndexOf("/") + 1);
+            // If no new filename is given, we keep the old one
+            if (name.equals("")) name = e.getName();
+
+            if (isFolder(e) && e.search(f)) {
+                // We can't move a folder into itself
+                System.out.println("Man kann ein Element nicht in sich selbst hinein verschieben.");
+                // Add it back to the original folder, since it was already deleted
+                children.add(e);
+            } else {
+                // parent has to be changed for rename to check the correct folder.
+                e.parent = f;
+                if (e.rename(name)) {
+                    f.children.add(e);
+                } else {
+                    // If renaming did not work, change bock whole procedure
+                    e.parent = this;
+                    children.add(e);
+                }
+            }
         }
     }
 }

@@ -2,7 +2,7 @@ public class File extends Element {
     private String content;
 
     // Create an empty file
-    public File(Element parent, String name) {
+    public File(Folder parent, String name) {
         // super calls the constructor of Element
         super(parent, name);
         this.content = "";
@@ -11,6 +11,11 @@ public class File extends Element {
     @Override
     public String getTree() {
         return getName();
+    }
+
+    @Override
+    public boolean search(Element e) {
+        return e == this;
     }
 
     // Adds content to a file
