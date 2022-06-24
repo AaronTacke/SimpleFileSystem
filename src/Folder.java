@@ -61,6 +61,16 @@ public class Folder extends Element {
         return child;
     }
 
+    @Override
+    public String getTree() {
+        StringBuilder tree = new StringBuilder(getName());
+        for (Element child : children) {
+            tree.append("\n |-");
+            tree.append(child.getTree().replace("\n", "\n | "));
+        }
+        return tree.toString();
+    }
+
     // Handle commands until the folder is left (using cd ..)
     public void ui() {
         Scanner scanner = new Scanner(System.in);
@@ -86,7 +96,7 @@ public class Folder extends Element {
                 help - gibt diese Benutzungs-Hilfe erneut aus
                 clear DATEI - entfernt den Inhalt aus DATEI
                 rm ELEMENT - entfernt Datei oder Ordner namens ELEMENT
-                TODO tree - gibt einen Verzeichnis-Baum ab dem aktuellen Ordner aus
+                tree - gibt einen Verzeichnis-Baum ab dem aktuellen Ordner aus
                 TODO mv ELEMENT PATH - verschiebt Element ELEMENT nach PATH
                 TODO cp ELEMENT PATH - kopiert Element ELEMENT nach PATH""");
     }
@@ -104,6 +114,7 @@ public class Folder extends Element {
             case "help" -> printHelp();
             case "clear" -> handleClear(input);
             case "rm" -> handleRm(input);
+            case "tree" -> handleTree(input);
             default -> System.out.println("Befehl \"" + input[0] + "\" nicht gefunden.");
         }
     }
@@ -179,8 +190,16 @@ public class Folder extends Element {
     private void handleRm(String[] input) {
         if (input.length != 2) {
             System.out.println("\"rm ELEMENT\" erwartet 1 Argument.");
-        }else if(remove(input[1]) == null){
+        } else if (remove(input[1]) == null) {
             System.out.println(input[1] + " existiert nicht.");
+        }
+    }
+
+    private void handleTree(String[] input) {
+        if (input.length != 1) {
+            System.out.println("\"tree\" erwartet keine Argumente.");
+        } else {
+            System.out.println(getTree());
         }
     }
 }

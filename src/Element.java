@@ -34,6 +34,9 @@ public abstract class Element {
         return object instanceof File;
     }
 
+    // Prints a tree of the underlaying file structure recursively
+    public abstract String getTree();
+
     // Starts the UI with a short How-To Guide
     public static void main(String[] args) {
         Folder f = new Folder();

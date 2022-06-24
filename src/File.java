@@ -8,6 +8,11 @@ public class File extends Element {
         this.content = "";
     }
 
+    @Override
+    public String getTree() {
+        return getName();
+    }
+
     // Adds content to a file
     public void write(String content) {
         this.content = content;
